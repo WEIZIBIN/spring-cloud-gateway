@@ -53,10 +53,11 @@ public class RedisRouteDefinitionRepository implements RouteDefinitionRepository
 	public Flux<RouteDefinition> getRouteDefinitions() {
 		return reactiveRedisTemplate.keys(createKey("*"))
 				.flatMap(key -> reactiveRedisTemplate.opsForValue().get(key))
-				.onErrorContinue((throwable, routeDefinition) -> {
+                .onErrorResume(throwable -> {
                     if (log.isErrorEnabled()) {
                         log.error("get routes from redis error cause : {}", throwable.toString(), throwable);
                     }
+                    return Flux.empty();
                 });
 	}
 
